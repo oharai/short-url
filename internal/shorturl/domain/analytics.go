@@ -5,11 +5,11 @@ import "time"
 // AnalyticsEvent represents an event that occurred in the URL shortening system.
 // These events are used for tracking user behavior, system performance, and business metrics.
 type AnalyticsEvent struct {
-	EventType    string                 `json:"eventType"`    // Type of event (url_created, url_accessed, etc.)
-	ShortURL     string                 `json:"shortUrl"`     // The short URL involved in the event
-	LongURL      string                 `json:"longUrl"`      // The corresponding long URL
+	EventType    string                 `json:"eventType"`              // Type of event (url_created, url_accessed, etc.)
+	ShortURL     string                 `json:"shortUrl"`               // The short URL involved in the event
+	LongURL      string                 `json:"longUrl"`                // The corresponding long URL
 	UserMetadata map[string]interface{} `json:"userMetadata,omitempty"` // Additional context data
-	Timestamp    time.Time              `json:"timestamp"`    // When the event occurred
+	Timestamp    time.Time              `json:"timestamp"`              // When the event occurred
 }
 
 // AnalyticsService defines the contract for sending analytics events to external systems.

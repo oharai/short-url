@@ -13,8 +13,8 @@ import (
 // It provides a simple, thread-safe storage solution suitable for development, testing,
 // and small-scale deployments. Data is lost when the application restarts.
 type MemoryShortURLRepository struct {
-	mu   sync.RWMutex                    // Read-write mutex for concurrent access safety
-	data map[string]*domain.ShortURL    // In-memory storage keyed by URL ID
+	mu   sync.RWMutex                // Read-write mutex for concurrent access safety
+	data map[string]*domain.ShortURL // In-memory storage keyed by URL ID
 }
 
 // NewMemoryShortURLRepository creates a new instance of the in-memory repository.

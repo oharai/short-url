@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/oharai/short-url/internal/shorturl/app"
 	"github.com/oharai/short-url/internal/shorturl/infra"
@@ -20,16 +21,16 @@ import (
 func main() {
 	// Configuration - In production, these would come from environment variables
 	baseURL := "http://localhost:8080"
-	
+
 	// Dependency Injection Setup
 	// Create infrastructure layer implementations
-	repo := infra.NewMemoryShortURLRepository()       // Data persistence layer
-	kgs := infra.NewBase62KeyGenerationService()      // Unique ID generation service
-	analytics := infra.NewMockAnalyticsService()      // Analytics event processing
-	
+	repo := infra.NewMemoryShortURLRepository()  // Data persistence layer
+	kgs := infra.NewBase62KeyGenerationService() // Unique ID generation service
+	analytics := infra.NewMockAnalyticsService() // Analytics event processing
+
 	// Create application layer service with injected dependencies
 	service := app.NewShortURLService(repo, kgs, analytics, baseURL)
-	
+
 	// Create presentation layer handler
 	handler := httpHandler.NewShortURLHandler(service)
 
@@ -39,31 +40,35 @@ func main() {
 	http.HandleFunc("/v1/getLongUrl", handler.GetLongURL)
 	http.HandleFunc("/admin/shorturls", handler.GetAllShortURLs)
 	http.HandleFunc("/admin/deactivate", handler.DeactivateShortURL)
-	
+
 	// Catch-all handler for short URL redirection
 	// This handles GET /<shortId> requests and redirects to original URLs
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Handle root path requests
 		if r.URL.Path == "/" {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Short URL not found"))
+			if _, err := w.Write([]byte("Short URL not found")); err != nil {
+				log.Printf("Failed to write response: %v", err)
+			}
 			return
 		}
-		
+
 		// Handle unmatched API/admin paths
 		if strings.HasPrefix(r.URL.Path, "/v1/") || strings.HasPrefix(r.URL.Path, "/admin/") {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("Endpoint not found"))
+			if _, err := w.Write([]byte("Endpoint not found")); err != nil {
+				log.Printf("Failed to write response: %v", err)
+			}
 			return
 		}
-		
+
 		// Delegate to short URL redirection handler
 		handler.RedirectShortURL(w, r)
 	})
 
 	// Server Configuration and Startup
 	port := ":8080"
-	
+
 	// Display startup information for development convenience
 	fmt.Printf("Server starting on port %s\n", port)
 	fmt.Printf("API Endpoints:\n")
@@ -72,7 +77,17 @@ func main() {
 	fmt.Printf("  GET  %s/admin/shorturls - List all URLs\n", baseURL)
 	fmt.Printf("  DELETE %s/admin/deactivate?id=<id> - Deactivate URL\n", baseURL)
 	fmt.Printf("  GET  %s/<shortId> - Redirect to long URL\n", baseURL)
-	
+
+	// Configure HTTP server with appropriate timeouts for security
+	server := &http.Server{
+		Addr:           port,
+		Handler:        nil, // Use default ServeMux
+		ReadTimeout:    15 * time.Second,
+		WriteTimeout:   15 * time.Second,
+		IdleTimeout:    60 * time.Second,
+		MaxHeaderBytes: 1 << 20, // 1 MB
+	}
+
 	// Start HTTP server - this call blocks until the server shuts down
-	log.Fatal(http.ListenAndServe(port, nil))
+	log.Fatal(server.ListenAndServe())
 }

@@ -12,7 +12,7 @@ func TestNewMockAnalyticsService(t *testing.T) {
 	if analytics == nil {
 		t.Error("expected analytics service to be created")
 	}
-	
+
 	// Test that it implements the interface
 	_, ok := analytics.(*MockAnalyticsService)
 	if !ok {
@@ -22,7 +22,7 @@ func TestNewMockAnalyticsService(t *testing.T) {
 
 func TestMockAnalyticsService_SendEvent(t *testing.T) {
 	analytics := NewMockAnalyticsService().(*MockAnalyticsService)
-	
+
 	event := domain.AnalyticsEvent{
 		EventType: "url_created",
 		ShortURL:  "http://test.com/abc123",
@@ -33,7 +33,7 @@ func TestMockAnalyticsService_SendEvent(t *testing.T) {
 		},
 		Timestamp: time.Now(),
 	}
-	
+
 	err := analytics.SendEvent(event)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -42,7 +42,7 @@ func TestMockAnalyticsService_SendEvent(t *testing.T) {
 
 func TestMockAnalyticsService_SendEvent_Multiple(t *testing.T) {
 	analytics := NewMockAnalyticsService().(*MockAnalyticsService)
-	
+
 	events := []domain.AnalyticsEvent{
 		{
 			EventType: "url_created",
@@ -66,7 +66,7 @@ func TestMockAnalyticsService_SendEvent_Multiple(t *testing.T) {
 			Timestamp: time.Now(),
 		},
 	}
-	
+
 	for i, event := range events {
 		err := analytics.SendEvent(event)
 		if err != nil {
@@ -77,9 +77,9 @@ func TestMockAnalyticsService_SendEvent_Multiple(t *testing.T) {
 
 func TestMockAnalyticsService_SendEvent_EmptyEvent(t *testing.T) {
 	analytics := NewMockAnalyticsService().(*MockAnalyticsService)
-	
+
 	emptyEvent := domain.AnalyticsEvent{}
-	
+
 	err := analytics.SendEvent(emptyEvent)
 	if err != nil {
 		t.Errorf("unexpected error for empty event: %v", err)
@@ -88,7 +88,7 @@ func TestMockAnalyticsService_SendEvent_EmptyEvent(t *testing.T) {
 
 func TestMockAnalyticsService_SendEvent_NilMetadata(t *testing.T) {
 	analytics := NewMockAnalyticsService().(*MockAnalyticsService)
-	
+
 	event := domain.AnalyticsEvent{
 		EventType:    "url_created",
 		ShortURL:     "http://test.com/abc123",
@@ -96,7 +96,7 @@ func TestMockAnalyticsService_SendEvent_NilMetadata(t *testing.T) {
 		UserMetadata: nil, // nil metadata
 		Timestamp:    time.Now(),
 	}
-	
+
 	err := analytics.SendEvent(event)
 	if err != nil {
 		t.Errorf("unexpected error for event with nil metadata: %v", err)

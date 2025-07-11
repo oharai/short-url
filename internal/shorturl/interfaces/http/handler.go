@@ -64,7 +64,9 @@ func (h *ShortURLHandler) CreateShortURL(w http.ResponseWriter, r *http.Request)
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid JSON"})
+		if encodeErr := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid JSON"}); encodeErr != nil {
+			http.Error(w, "Failed to encode error response", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -78,7 +80,9 @@ func (h *ShortURLHandler) CreateShortURL(w http.ResponseWriter, r *http.Request)
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		if encodeErr := json.NewEncoder(w).Encode(map[string]string{"error": err.Error()}); encodeErr != nil {
+			http.Error(w, "Failed to encode error response", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -115,7 +119,9 @@ func (h *ShortURLHandler) GetLongURL(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid JSON"})
+		if encodeErr := json.NewEncoder(w).Encode(map[string]string{"error": "Invalid JSON"}); encodeErr != nil {
+			http.Error(w, "Failed to encode error response", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -129,7 +135,9 @@ func (h *ShortURLHandler) GetLongURL(w http.ResponseWriter, r *http.Request) {
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		if encodeErr := json.NewEncoder(w).Encode(map[string]string{"error": err.Error()}); encodeErr != nil {
+			http.Error(w, "Failed to encode error response", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -169,7 +177,7 @@ func (h *ShortURLHandler) RedirectShortURL(w http.ResponseWriter, r *http.Reques
 	req := app.GetLongURLRequest{
 		ShortURL: shortURL,
 		UserMetadata: map[string]interface{}{
-			"ip":         r.RemoteAddr,   // Client IP address
+			"ip":         r.RemoteAddr,  // Client IP address
 			"user_agent": r.UserAgent(), // Browser/client information
 			"referer":    r.Referer(),   // Referring page
 		},
@@ -185,7 +193,9 @@ func (h *ShortURLHandler) RedirectShortURL(w http.ResponseWriter, r *http.Reques
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		if encodeErr := json.NewEncoder(w).Encode(map[string]string{"error": err.Error()}); encodeErr != nil {
+			http.Error(w, "Failed to encode error response", http.StatusInternalServerError)
+		}
 		return
 	}
 

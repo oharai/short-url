@@ -89,7 +89,7 @@ func (m *mockKGS) GetMultipleIDs(count int) ([]string, error) {
 }
 
 type mockAnalytics struct {
-	events []domain.AnalyticsEvent
+	events  []domain.AnalyticsEvent
 	sendErr error
 }
 
@@ -117,6 +117,7 @@ func TestNewShortURLService(t *testing.T) {
 
 	if service == nil {
 		t.Error("expected service to be created")
+		return
 	}
 
 	if service.baseURL != baseURL {
@@ -141,7 +142,7 @@ func TestShortURLService_CreateShortURL(t *testing.T) {
 					"userId": "user123",
 				},
 			},
-			setupMocks: func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
+			setupMocks:  func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
 			expectError: false,
 			validate: func(t *testing.T, resp *CreateShortURLResponse, repo *mockRepository, analytics *mockAnalytics) {
 				if resp == nil {
@@ -165,7 +166,7 @@ func TestShortURLService_CreateShortURL(t *testing.T) {
 				LongURL:   "https://example.com",
 				CustomURL: "my-custom-url",
 			},
-			setupMocks: func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
+			setupMocks:  func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
 			expectError: false,
 			validate: func(t *testing.T, resp *CreateShortURLResponse, repo *mockRepository, analytics *mockAnalytics) {
 				if resp.ShortURL != "my-custom-url" {
@@ -178,9 +179,9 @@ func TestShortURLService_CreateShortURL(t *testing.T) {
 			request: CreateShortURLRequest{
 				LongURL: "",
 			},
-			setupMocks: func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
+			setupMocks:  func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
 			expectError: true,
-			errorMsg:   "longUrl is required",
+			errorMsg:    "longUrl is required",
 		},
 		{
 			name: "custom URL already exists",
@@ -193,7 +194,7 @@ func TestShortURLService_CreateShortURL(t *testing.T) {
 				repo.Save(existingURL)
 			},
 			expectError: true,
-			errorMsg:   "custom URL already exists",
+			errorMsg:    "custom URL already exists",
 		},
 		{
 			name: "KGS generation error",
@@ -204,7 +205,7 @@ func TestShortURLService_CreateShortURL(t *testing.T) {
 				kgs.genErr = errors.New("generation failed")
 			},
 			expectError: true,
-			errorMsg:   "failed to generate unique ID: generation failed",
+			errorMsg:    "failed to generate unique ID: generation failed",
 		},
 		{
 			name: "repository save error",
@@ -215,7 +216,7 @@ func TestShortURLService_CreateShortURL(t *testing.T) {
 				repo.saveErr = errors.New("save failed")
 			},
 			expectError: true,
-			errorMsg:   "save failed",
+			errorMsg:    "save failed",
 		},
 	}
 
@@ -282,18 +283,18 @@ func TestShortURLService_GetLongURL(t *testing.T) {
 			request: GetLongURLRequest{
 				ShortURL: "",
 			},
-			setupMocks: func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
+			setupMocks:  func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
 			expectError: true,
-			errorMsg:   "shortUrl is required",
+			errorMsg:    "shortUrl is required",
 		},
 		{
 			name: "URL not found",
 			request: GetLongURLRequest{
 				ShortURL: "http://test.com/notfound",
 			},
-			setupMocks: func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
+			setupMocks:  func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
 			expectError: true,
-			errorMsg:   "short URL not found",
+			errorMsg:    "short URL not found",
 		},
 		{
 			name: "inactive URL",
@@ -306,7 +307,7 @@ func TestShortURLService_GetLongURL(t *testing.T) {
 				repo.Save(shortURL)
 			},
 			expectError: true,
-			errorMsg:   "short URL is not active or expired",
+			errorMsg:    "short URL is not active or expired",
 		},
 		{
 			name: "expired URL",
@@ -319,7 +320,7 @@ func TestShortURLService_GetLongURL(t *testing.T) {
 				repo.Save(shortURL)
 			},
 			expectError: true,
-			errorMsg:   "short URL is not active or expired",
+			errorMsg:    "short URL is not active or expired",
 		},
 		{
 			name: "repository error",
@@ -330,7 +331,7 @@ func TestShortURLService_GetLongURL(t *testing.T) {
 				repo.findErr = errors.New("database error")
 			},
 			expectError: true,
-			errorMsg:   "database error",
+			errorMsg:    "database error",
 		},
 	}
 
@@ -394,8 +395,8 @@ func TestShortURLService_GetAllShortURLs(t *testing.T) {
 			expectCount: 2,
 		},
 		{
-			name: "empty repository",
-			setupMocks: func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
+			name:        "empty repository",
+			setupMocks:  func(repo *mockRepository, kgs *mockKGS, analytics *mockAnalytics) {},
 			expectError: false,
 			expectCount: 0,
 		},

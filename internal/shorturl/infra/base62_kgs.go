@@ -31,7 +31,7 @@ type Base62KeyGenerationService struct {
 func NewBase62KeyGenerationService() domain.KeyGenerationService {
 	// Initialize counter with a random value to prevent predictable sequences
 	randomStart, _ := rand.Int(rand.Reader, big.NewInt(1000000))
-	
+
 	return &Base62KeyGenerationService{
 		counter: randomStart.Int64() + time.Now().Unix(), // Combine random value with timestamp
 		buffer:  make([]string, 0),
@@ -89,6 +89,8 @@ func (k *Base62KeyGenerationService) GetMultipleIDs(count int) ([]string, error)
 // Returns:
 //   - []string: Slice of generated IDs
 //   - error: Always nil for this implementation
+//
+//nolint:unparam // error return is kept for future extensibility
 func (k *Base62KeyGenerationService) generateMultipleIDsInternal(count int) ([]string, error) {
 	ids := make([]string, count)
 	for i := range count {
@@ -108,24 +110,24 @@ func (k *Base62KeyGenerationService) generateMultipleIDsInternal(count int) ([]s
 //   - int64: A unique but non-sequential value
 func (k *Base62KeyGenerationService) generateNonSequentialValue() int64 {
 	// Use counter for uniqueness but scramble it to prevent sequential patterns
-	
+
 	// Method 1: XOR with a random seed based on current time
 	timeSeed := time.Now().UnixNano() & 0xFFFF // Use lower 16 bits of nanoseconds
 	scrambled := k.counter ^ timeSeed
-	
+
 	// Method 2: Add a small random component
 	randomComponent, _ := rand.Int(rand.Reader, big.NewInt(1000))
 	scrambled += randomComponent.Int64()
-	
+
 	// Method 3: Bit rotation to further scramble the value
 	// Rotate bits to make the pattern less predictable
 	scrambled = ((scrambled << 13) | (scrambled >> (64 - 13))) // Rotate left by 13 bits
-	
+
 	// Ensure the result is positive and within a reasonable range
 	if scrambled < 0 {
 		scrambled = -scrambled
 	}
-	
+
 	return scrambled
 }
 

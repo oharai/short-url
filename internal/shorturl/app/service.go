@@ -100,7 +100,8 @@ func (s *ShortURLService) CreateShortURL(req CreateShortURLRequest) (*CreateShor
 		UserMetadata: shortURL.UserMetadata(),
 		Timestamp:    time.Now(),
 	}
-	s.analytics.SendEvent(event)
+	// Note: Analytics errors are not critical and should not affect core functionality
+	_ = s.analytics.SendEvent(event)
 
 	return &CreateShortURLResponse{
 		ShortURL: shortURL.ShortURL(),
@@ -148,7 +149,8 @@ func (s *ShortURLService) GetLongURL(req GetLongURLRequest) (string, error) {
 		UserMetadata: req.UserMetadata,
 		Timestamp:    time.Now(),
 	}
-	s.analytics.SendEvent(event)
+	// Note: Analytics errors are not critical and should not affect core functionality
+	_ = s.analytics.SendEvent(event)
 
 	return shortURL.LongURL(), nil
 }
@@ -211,7 +213,7 @@ func (s *ShortURLService) DeactivateShortURL(id string) error {
 
 	// Apply business operation
 	shortURL.Deactivate()
-	
+
 	// Persist the change
 	err = s.repo.Save(shortURL)
 	if err != nil {
@@ -226,7 +228,8 @@ func (s *ShortURLService) DeactivateShortURL(id string) error {
 		UserMetadata: shortURL.UserMetadata(),
 		Timestamp:    time.Now(),
 	}
-	s.analytics.SendEvent(event)
+	// Note: Analytics errors are not critical and should not affect core functionality
+	_ = s.analytics.SendEvent(event)
 
 	return nil
 }

@@ -15,12 +15,12 @@ import (
 
 // Mock service for testing
 type mockShortURLService struct {
-	createResponse *app.CreateShortURLResponse
-	createError    error
-	longURL        string
-	getLongError   error
-	allURLs        []*app.ShortURLResponse
-	getAllError    error
+	createResponse  *app.CreateShortURLResponse
+	createError     error
+	longURL         string
+	getLongError    error
+	allURLs         []*app.ShortURLResponse
+	getAllError     error
 	deactivateError error
 }
 
@@ -52,11 +52,12 @@ func (m *mockShortURLService) DeactivateShortURL(id string) error {
 func TestNewShortURLHandler(t *testing.T) {
 	service := &mockShortURLService{}
 	handler := NewShortURLHandler(service)
-	
+
 	if handler == nil {
 		t.Error("expected handler to be created")
+		return
 	}
-	
+
 	if handler.service == nil {
 		t.Error("expected service to be set")
 	}
@@ -136,13 +137,13 @@ func TestShortURLHandler_CreateShortURL(t *testing.T) {
 			expectedBody:   `{"error":"longUrl is required"}`,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			service := &mockShortURLService{}
 			tt.setupService(service)
 			handler := NewShortURLHandler(service)
-			
+
 			var body []byte
 			if tt.body != nil {
 				if str, ok := tt.body.(string); ok {
@@ -151,24 +152,24 @@ func TestShortURLHandler_CreateShortURL(t *testing.T) {
 					body, _ = json.Marshal(tt.body)
 				}
 			}
-			
+
 			req := httptest.NewRequest(tt.method, "/v1/createShortUrl", bytes.NewReader(body))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
-			
+
 			handler.CreateShortURL(w, req)
-			
+
 			if w.Code != tt.expectedStatus {
 				t.Errorf("expected status %d, got %d", tt.expectedStatus, w.Code)
 			}
-			
+
 			if tt.expectedBody != "" {
 				body := strings.TrimSpace(w.Body.String())
 				if body != tt.expectedBody {
 					t.Errorf("expected body %q, got %q", tt.expectedBody, body)
 				}
 			}
-			
+
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, w)
 			}
@@ -243,13 +244,13 @@ func TestShortURLHandler_GetLongURL(t *testing.T) {
 			expectedBody:   `{"error":"database error"}`,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			service := &mockShortURLService{}
 			tt.setupService(service)
 			handler := NewShortURLHandler(service)
-			
+
 			var body []byte
 			if tt.body != nil {
 				if str, ok := tt.body.(string); ok {
@@ -258,24 +259,24 @@ func TestShortURLHandler_GetLongURL(t *testing.T) {
 					body, _ = json.Marshal(tt.body)
 				}
 			}
-			
+
 			req := httptest.NewRequest(tt.method, "/v1/getLongUrl", bytes.NewReader(body))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
-			
+
 			handler.GetLongURL(w, req)
-			
+
 			if w.Code != tt.expectedStatus {
 				t.Errorf("expected status %d, got %d", tt.expectedStatus, w.Code)
 			}
-			
+
 			if tt.expectedBody != "" {
 				body := strings.TrimSpace(w.Body.String())
 				if body != tt.expectedBody {
 					t.Errorf("expected body %q, got %q", tt.expectedBody, body)
 				}
 			}
-			
+
 			if tt.checkHeaders != nil {
 				tt.checkHeaders(t, w)
 			}
@@ -341,30 +342,30 @@ func TestShortURLHandler_RedirectShortURL(t *testing.T) {
 			expectedBody:   `{"error":"database error"}`,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			service := &mockShortURLService{}
 			tt.setupService(service)
 			handler := NewShortURLHandler(service)
-			
+
 			req := httptest.NewRequest(tt.method, tt.path, nil)
 			req.Host = tt.host
 			w := httptest.NewRecorder()
-			
+
 			handler.RedirectShortURL(w, req)
-			
+
 			if w.Code != tt.expectedStatus {
 				t.Errorf("expected status %d, got %d", tt.expectedStatus, w.Code)
 			}
-			
+
 			if tt.expectedBody != "" {
 				body := strings.TrimSpace(w.Body.String())
 				if body != tt.expectedBody {
 					t.Errorf("expected body %q, got %q", tt.expectedBody, body)
 				}
 			}
-			
+
 			if tt.checkLocation != nil {
 				tt.checkLocation(t, w)
 			}
@@ -387,18 +388,18 @@ func TestShortURLHandler_GetAllShortURLs(t *testing.T) {
 			setupService: func(m *mockShortURLService) {
 				m.allURLs = []*app.ShortURLResponse{
 					{
-						ID:       "abc123",
-						LongURL:  "https://example1.com",
-						ShortURL: "http://test.com/abc123",
+						ID:        "abc123",
+						LongURL:   "https://example1.com",
+						ShortURL:  "http://test.com/abc123",
 						CreatedAt: time.Now(),
-						IsActive: true,
+						IsActive:  true,
 					},
 					{
-						ID:       "def456",
-						LongURL:  "https://example2.com",
-						ShortURL: "http://test.com/def456",
+						ID:        "def456",
+						LongURL:   "https://example2.com",
+						ShortURL:  "http://test.com/def456",
 						CreatedAt: time.Now(),
-						IsActive: true,
+						IsActive:  true,
 					},
 				}
 			},
@@ -438,29 +439,29 @@ func TestShortURLHandler_GetAllShortURLs(t *testing.T) {
 			expectedBody:   "[]",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			service := &mockShortURLService{}
 			tt.setupService(service)
 			handler := NewShortURLHandler(service)
-			
+
 			req := httptest.NewRequest(tt.method, "/admin/shorturls", nil)
 			w := httptest.NewRecorder()
-			
+
 			handler.GetAllShortURLs(w, req)
-			
+
 			if w.Code != tt.expectedStatus {
 				t.Errorf("expected status %d, got %d", tt.expectedStatus, w.Code)
 			}
-			
+
 			if tt.expectedBody != "" {
 				body := strings.TrimSpace(w.Body.String())
 				if body != tt.expectedBody {
 					t.Errorf("expected body %q, got %q", tt.expectedBody, body)
 				}
 			}
-			
+
 			if tt.checkResponse != nil {
 				tt.checkResponse(t, w)
 			}
@@ -510,22 +511,22 @@ func TestShortURLHandler_DeactivateShortURL(t *testing.T) {
 			expectedStatus: http.StatusNotFound,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			service := &mockShortURLService{}
 			tt.setupService(service)
 			handler := NewShortURLHandler(service)
-			
+
 			req := httptest.NewRequest(tt.method, "/admin/deactivate"+tt.queryParams, nil)
 			w := httptest.NewRecorder()
-			
+
 			handler.DeactivateShortURL(w, req)
-			
+
 			if w.Code != tt.expectedStatus {
 				t.Errorf("expected status %d, got %d", tt.expectedStatus, w.Code)
 			}
-			
+
 			if tt.expectedBody != "" {
 				body := strings.TrimSpace(w.Body.String())
 				if body != tt.expectedBody {

@@ -7,14 +7,14 @@ import (
 
 func TestNewShortURL(t *testing.T) {
 	tests := []struct {
-		name        string
-		id          string
-		longURL     string
-		shortURL    string
-		expiry      *time.Time
+		name         string
+		id           string
+		longURL      string
+		shortURL     string
+		expiry       *time.Time
 		userMetadata map[string]interface{}
-		expectError bool
-		errorMsg    string
+		expectError  bool
+		errorMsg     string
 	}{
 		{
 			name:     "valid short URL creation",
@@ -44,11 +44,11 @@ func TestNewShortURL(t *testing.T) {
 			errorMsg:    "short URL cannot be empty",
 		},
 		{
-			name:     "with expiry time",
-			id:       "abc123",
-			longURL:  "https://example.com",
-			shortURL: "http://short.ly/abc123",
-			expiry:   timePtr(time.Now().Add(24 * time.Hour)),
+			name:        "with expiry time",
+			id:          "abc123",
+			longURL:     "https://example.com",
+			shortURL:    "http://short.ly/abc123",
+			expiry:      timePtr(time.Now().Add(24 * time.Hour)),
 			expectError: false,
 		},
 	}
@@ -102,13 +102,13 @@ func TestNewShortURL(t *testing.T) {
 
 func TestNewCustomShortURL(t *testing.T) {
 	tests := []struct {
-		name        string
-		customURL   string
-		longURL     string
-		expiry      *time.Time
+		name         string
+		customURL    string
+		longURL      string
+		expiry       *time.Time
 		userMetadata map[string]interface{}
-		expectError bool
-		errorMsg    string
+		expectError  bool
+		errorMsg     string
 	}{
 		{
 			name:      "valid custom short URL creation",
